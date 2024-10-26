@@ -15,6 +15,9 @@ const addProduct = async (req, res) => {
       specs,
     } = req.body;
 
+    console.log(req.body.images);
+    console.log(req.body.specs);
+
     const newProduct = new Product({
       title,
       category,
@@ -48,4 +51,18 @@ const getProducts = async (req, res) => {
   }
 };
 
-module.exports = { addProduct, getProducts };
+const productById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(id);
+    const result = await Product.findById(id);
+    res.status(200).json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Error getting product details, please try again later.",
+    });
+  }
+};
+
+module.exports = { addProduct, getProducts, productById };

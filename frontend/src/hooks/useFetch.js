@@ -6,22 +6,36 @@ const useFetch = (url) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch(url)
-      .then((response) => {
+    const fetchData = async () => {
+      try {
+        console.log("Requestin url", url);
+        const response = await fetch(url, {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        });
+
         if (!response.ok) {
-          throw new Error("could not fetch the data for their resource");
+          throw new Error(`Expected Token: ${response.status}`);
         }
-        return response.json();
-      })
-      .then((data) => {
-        setLoading(false);
-        setData(data);
-        setError(null);
-      })
-      .catch((error) => {
-        setLoading(false);
+
+        const contentType = response.headers.get("content-type");
+
+        if (contentType && contentType.includes("application/json")) {
+          const result = await response.json();
+          setData(result);
+        } else {
+          throw new Error("Expected JSON, received HTML/other format");
+        }
+      } catch (error) {
         setError(error.message);
-      });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [url]);
 
   return { data, loading, error };
