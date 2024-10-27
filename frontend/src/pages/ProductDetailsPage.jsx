@@ -16,9 +16,17 @@ import Rating from "../component/Rating";
 const ProductDetailsPage = () => {
   const { id } = useParams();
 
-  const { data, error } = useFetch(
+  const { data, error, loading } = useFetch(
     `http://localhost:3000/api/v1/products/${id}`
   );
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error..{error}</div>;
+  }
 
   return (
     <>
@@ -51,8 +59,8 @@ const ProductDetailsPage = () => {
             <ListGroup.Item>Price: Rs. {data?.price}</ListGroup.Item>
             <ListGroup.Item>
               Specification:
-              {data?.specs.map((item) => (
-                <ListGroup.Item>{item}</ListGroup.Item>
+              {data?.specs.map((item, index) => (
+                <ListGroup.Item key={index}>{item}</ListGroup.Item>
               ))}
             </ListGroup.Item>
           </ListGroup>
