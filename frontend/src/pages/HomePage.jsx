@@ -1,17 +1,34 @@
 import React, { useEffect, useState } from "react";
 import useFetch from "../hooks/useFetch";
-import { Button, Col, Form, ListGroup, Row } from "react-bootstrap";
+import {
+  Alert,
+  Button,
+  Col,
+  Form,
+  ListGroup,
+  NavDropdown,
+  Row,
+  Spinner,
+} from "react-bootstrap";
 import Product from "../component/Product";
+import { IoIosArrowForward } from "react-icons/io";
 
 const HomePage = () => {
   const { data, loading, error } = useFetch(
     "http://localhost:3000/api/v1/products/"
   );
 
+  const {
+    data: categories,
+    error: categoriesError,
+    loading: categoriesLoading,
+  } = useFetch("http://localhost:3000/api/v1/categories");
+
   const [search, setSearch] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [filterProducts, setFiltereProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   if (error) {
     return <div>{error}</div>;
@@ -30,6 +47,17 @@ const HomePage = () => {
     }
   }, [search, data?.products]);
 
+  useEffect(() => {
+    if (selectedCategory) {
+      const filterCategory = data?.products.filter((product) => {
+        return product.category === selectedCategory;
+      });
+      setFiltereProducts(filterCategory);
+    } else {
+      setFiltereProducts(data?.products || []);
+    }
+  }, [selectedCategory, data?.products]);
+
   const handleChange = (e) => {
     setSearch(e.target.value);
   };
@@ -39,40 +67,74 @@ const HomePage = () => {
     setSuggestions([]);
   };
 
+  const handleClickFilter = (category) => {
+    console.log(category);
+    setSelectedCategory(category);
+  };
+
   return (
     <>
-      <Form className="d-flex">
-        <Form.Control
-          type="search"
-          placeholder="Search"
-          className="me-2"
-          aria-label="Search"
-          value={search}
-          onChange={handleChange}
-        />
-
-        {suggestions.length > 0 && (
-          <ListGroup
-            style={{
-              position: "absolute",
-              zIndex: "1",
-              top: "130px",
-              right: "200px",
-              width: "60%",
-            }}
-          >
-            {suggestions.map((suggest) => (
-              <ListGroup.Item
-                key={suggest.id}
-                style={{ color: "white", backgroundColor: "black" }}
-                onClick={() => handleClickSuggestion(suggest)}
+      <div className="d-flex justify-content-between">
+        <NavDropdown
+          title="Product Categories"
+          id="offcanvasNavbarDropdown-expand-xl"
+          className="mx-2 fs-5"
+        >
+          {categoriesLoading ? (
+            <Spinner animation="border" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </Spinner>
+          ) : categoriesError ? (
+            <Alert variant="danger">
+              Error loading product for this categories
+            </Alert>
+          ) : (
+            categories?.result.map((item) => (
+              <NavDropdown.Item
+                href="#action3"
+                className="d-flex justify-content-between"
+                key={item._id}
+                onClick={() => handleClickFilter(item.title)}
               >
-                {suggest.title}
-              </ListGroup.Item>
-            ))}
-          </ListGroup>
-        )}
-      </Form>
+                {item.title}
+                <IoIosArrowForward />
+              </NavDropdown.Item>
+            ))
+          )}
+        </NavDropdown>
+        <Form className="d-flex">
+          <Form.Control
+            type="search"
+            placeholder="Search"
+            className="me-2"
+            aria-label="Search"
+            value={search}
+            onChange={handleChange}
+          />
+
+          {suggestions.length > 0 && (
+            <ListGroup
+              style={{
+                position: "absolute",
+                zIndex: "1",
+                top: "130px",
+                right: "200px",
+                width: "60%",
+              }}
+            >
+              {suggestions.map((suggest) => (
+                <ListGroup.Item
+                  key={suggest.id}
+                  style={{ color: "white", backgroundColor: "black" }}
+                  onClick={() => handleClickSuggestion(suggest)}
+                >
+                  {suggest.title}
+                </ListGroup.Item>
+              ))}
+            </ListGroup>
+          )}
+        </Form>
+      </div>
       {loading && <div>Loading Products...</div>}
 
       {error && <div>{error}</div>}

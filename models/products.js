@@ -29,10 +29,10 @@ const productSchema = new mongoose.Schema({
     type: Number,
     default: 20,
   },
-  filter1: {
+  brand: {
     type: String,
   },
-  filter2: {
+  color: {
     type: String,
   },
   images: [String],

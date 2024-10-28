@@ -8,7 +8,6 @@ const useFetch = (url) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log("Requestin url", url);
         const response = await fetch(url, {
           headers: {
             "Content-Type": "application/json",

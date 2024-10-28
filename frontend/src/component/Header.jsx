@@ -20,7 +20,9 @@ const Header = () => {
       >
         <Container fluid>
           <LinkContainer to="/">
-            <Navbar.Brand>ShopMart</Navbar.Brand>
+            <Navbar.Brand className="fs-2 font-font-monospace">
+              ShopMart
+            </Navbar.Brand>
           </LinkContainer>
           <Navbar.Toggle aria-controls="offcanvasNavbar-expand-xl" />
           <Navbar.Offcanvas
@@ -36,25 +38,12 @@ const Header = () => {
 
             <Offcanvas.Body>
               <Nav className="justify-content-end flex-grow-1 pe-3">
-                {/* <Nav.Link href="#action1">
-                  <FaShoppingCart />
-                  Cart
-                </Nav.Link> */}
                 <LinkContainer to="/login">
                   <Nav.Link>
-                    <FaUser size="" />
-                    Sign In
+                    <FaUser className="mx-2 fs-2" />
+                    <span className="fs-5">Sign In</span>
                   </Nav.Link>
                 </LinkContainer>
-                <NavDropdown
-                  title="Product Categories"
-                  id="offcanvasNavbarDropdown-expand-xl"
-                >
-                  <NavDropdown.Item href="#action3">Action</NavDropdown.Item>
-                  <NavDropdown.Item href="#action4">
-                    Another action
-                  </NavDropdown.Item>
-                </NavDropdown>
               </Nav>
             </Offcanvas.Body>
           </Navbar.Offcanvas>
