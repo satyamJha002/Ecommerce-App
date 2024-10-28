@@ -90,17 +90,19 @@ const HomePage = () => {
             </Alert>
           ) : (
             categories?.result.map((item) => (
-              <NavDropdown.Item
-                href="#action3"
-                className="d-flex justify-content-between"
-                key={item._id}
-                onClick={() => handleClickFilter(item.title)}
-              >
-                {item.title}
-                <IoIosArrowForward />
-              </NavDropdown.Item>
+              <div key={item._id}>
+                <NavDropdown.Item
+                  href="#action3"
+                  className="d-flex justify-content-between"
+                  onClick={() => handleClickFilter(item.title)}
+                >
+                  {item.title}
+                  <IoIosArrowForward />
+                </NavDropdown.Item>
+              </div>
             ))
           )}
+          <NavDropdown.Item href="/">All</NavDropdown.Item>
         </NavDropdown>
         <Form className="d-flex">
           <Form.Control
