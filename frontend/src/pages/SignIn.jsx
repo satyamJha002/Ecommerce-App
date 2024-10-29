@@ -1,8 +1,61 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button, Card, Col, Container, Form, Row } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const SignIn = () => {
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const { email, password } = formData;
+
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch("http://localhost:3000/api/v1/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+      const { success, message } = data;
+
+      if (success) {
+        toast.success(message);
+        setTimeout(() => {
+          navigate("/");
+        }, 1000);
+      } else {
+        toast.error(message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+
+    setFormData({
+      ...formData,
+      email: "",
+      password: "",
+    });
+  };
+
   return (
     <Container>
       <Row className="vh-100 d-flex justify-content-center align-items-center">
@@ -10,18 +63,30 @@ const SignIn = () => {
           <Card className="shadow bg-dark">
             <Card.Body className="text-light">
               <div className="mb-3 mt-3">
-                <Form className="mb-3">
+                <Form className="mb-3" onSubmit={handleFormSubmit}>
                   <h2 className="fw-bold mb-5">ShopMart</h2>
                   <Form.Group className="mb-3" controlId="formBasicEmail">
                     <Form.Label className="text-center">
                       Email address
                     </Form.Label>
-                    <Form.Control type="email" placeholder="Enter email" />
+                    <Form.Control
+                      type="email"
+                      placeholder="Enter email"
+                      name="email"
+                      value={email}
+                      onChange={handleChange}
+                    />
                   </Form.Group>
 
                   <Form.Group className="mb-3" controlId="formBasicPassword">
                     <Form.Label>Password</Form.Label>
-                    <Form.Control type="password" placeholder="Password" />
+                    <Form.Control
+                      type="password"
+                      placeholder="Password"
+                      name="password"
+                      value={password}
+                      onChange={handleChange}
+                    />
                   </Form.Group>
                   <div className="mb-3">
                     <p className="small">

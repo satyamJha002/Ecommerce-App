@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Button,
   Card,
@@ -8,9 +8,64 @@ import {
   InputGroup,
   Row,
 } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const SignUp = () => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+
+  const { name, email, password } = formData;
+
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch("http://localhost:3000/api/v1/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(formData),
+      });
+
+      const userData = await response.json();
+
+      const { success, message } = userData;
+
+      if (success) {
+        toast.success(message);
+        setTimeout(() => {
+          navigate("/login");
+        }, 1000);
+      } else {
+        toast.error(message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+
+    setFormData({
+      ...formData,
+      name: "",
+      email: "",
+      password: "",
+    });
+  };
+
   return (
     <Container>
       <Row className="vh-100 d-flex justify-content-center align-items-center">
@@ -19,7 +74,7 @@ const SignUp = () => {
             <Card.Body className="text-light">
               <div className="mb-3 mt-4">
                 <h2 className="fw-bold mb-5">ShopMart</h2>
-                <Form>
+                <Form onSubmit={handleFormSubmit}>
                   <Row className="mb-3">
                     <Form.Group
                       as={Col}
@@ -29,18 +84,12 @@ const SignUp = () => {
                       <Form.Label className="text-center">
                         Your full name
                       </Form.Label>
-                      <Form.Control type="text" placeholder="Enter name" />
-                    </Form.Group>
-
-                    <Form.Group
-                      as={Col}
-                      className="mb-3"
-                      controlId="formPhoneNumber"
-                    >
-                      <Form.Label>Phone Number</Form.Label>
                       <Form.Control
-                        type="number"
-                        placeholder="Enter phone number"
+                        type="text"
+                        placeholder="Enter name"
+                        name="name"
+                        value={name}
+                        onChange={handleChange}
                       />
                     </Form.Group>
                   </Row>
@@ -57,6 +106,9 @@ const SignUp = () => {
                         <Form.Control
                           type="email"
                           placeholder="Enter username"
+                          name="email"
+                          value={email}
+                          onChange={handleChange}
                         />
                         <InputGroup.Text className="text-primary">
                           @gmail.com
@@ -70,7 +122,13 @@ const SignUp = () => {
                       controlId="formBasicPassword"
                     >
                       <Form.Label>Password</Form.Label>
-                      <Form.Control type="password" placeholder="Password" />
+                      <Form.Control
+                        type="password"
+                        placeholder="Password"
+                        name="password"
+                        value={password}
+                        onChange={handleChange}
+                      />
                     </Form.Group>
                   </Row>
                   <div className="d-grid">
