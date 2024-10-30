@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Header from "./component/Header";
 import Footer from "./component/Footer";
 import HomePage from "./pages/HomePage";
+import Cart from "./component/Cart";
 import { Routes, Route } from "react-router-dom";
 import ProductDetailsPage from "./pages/ProductDetailsPage";
 import SignIn from "./pages/SignIn";
@@ -21,6 +22,7 @@ const App = () => {
             <Route path="/products/:id" element={<ProductDetailsPage />} />
             <Route path="/login" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/cart" element={<Cart />} />
           </Routes>
         </Container>
       </main>

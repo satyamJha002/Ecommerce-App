@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Button, Card, Col, Container, Form, Row } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useUserContext } from "../context/UserContext";
 
 const SignIn = () => {
   const [formData, setFormData] = useState({
@@ -12,6 +13,8 @@ const SignIn = () => {
   const { email, password } = formData;
 
   const navigate = useNavigate();
+
+  const { signIn } = useUserContext();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,33 +27,18 @@ const SignIn = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
-    try {
-      const response = await fetch("http://localhost:3000/api/v1/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(formData),
-      });
+    const { success, message } = await signIn(formData);
 
-      const data = await response.json();
-      const { success, message } = data;
-
-      if (success) {
-        toast.success(message);
-        setTimeout(() => {
-          navigate("/");
-        }, 1000);
-      } else {
-        toast.error(message);
-      }
-    } catch (error) {
-      console.log(error);
+    if (success) {
+      toast.success(message);
+      setTimeout(() => {
+        navigate("/");
+      }, 1000);
+    } else {
+      toast.error(message);
     }
 
     setFormData({
-      ...formData,
       email: "",
       password: "",
     });

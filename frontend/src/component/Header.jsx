@@ -5,12 +5,15 @@ import { FaUser } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useCartContext } from "../context/CartContext";
 
 const Header = () => {
   const [cookies, removeCookie] = useCookies([]);
   const [name, setName] = useState("");
 
   const navigate = useNavigate();
+
+  const { logOut } = useCartContext();
 
   const verifyCookie = async () => {
     if (!cookies.token) {
@@ -39,6 +42,7 @@ const Header = () => {
 
   const Logout = () => {
     removeCookie("token");
+    logOut;
     navigate("/login");
   };
 
