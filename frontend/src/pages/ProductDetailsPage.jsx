@@ -1,24 +1,38 @@
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import useFetch from "../hooks/useFetch";
 import { Link } from "react-router-dom";
-import {
-  Row,
-  Col,
-  Image,
-  ListGroup,
-  Card,
-  Button,
-  ListGroupItem,
-} from "react-bootstrap";
+import { Row, Col, Image, ListGroup, Card, Button } from "react-bootstrap";
 import Rating from "../component/Rating";
+import { useUserContext } from "../context/UserContext";
+import { toast } from "react-toastify";
+import { useCart } from "../context/CartContext";
+import Header from "../component/Header";
 
 const ProductDetailsPage = () => {
   const { id } = useParams();
 
+  const navigate = useNavigate();
+
+  const { isLoggedIn } = useUserContext();
+
+  const { cartItems, addToCart } = useCart();
+
   const { data, error, loading } = useFetch(
     `http://localhost:3000/api/v1/products/${id}`
   );
+
+  const handleClick = () => {
+    if (!isLoggedIn) {
+      toast.error("Please Sign in");
+      setTimeout(() => {
+        navigate("/login");
+      }, 1000);
+    } else {
+      addToCart();
+      toast.success("item is added to cart");
+    }
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -91,6 +105,7 @@ const ProductDetailsPage = () => {
                 <Button
                   className="btn-block"
                   type="button"
+                  onClick={handleClick}
                   disabled={data?.inStock === 0}
                 >
                   Add to Cart

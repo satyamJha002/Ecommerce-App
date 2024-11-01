@@ -1,11 +1,13 @@
 import { Navbar, Nav, Container, Offcanvas } from "react-bootstrap";
 import { useCookies } from "react-cookie";
 import { LinkContainer } from "react-router-bootstrap";
-import { FaUser } from "react-icons/fa";
+import { FaShoppingCart, FaUser } from "react-icons/fa";
+import { IoLogOut } from "react-icons/io5";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useCartContext } from "../context/CartContext";
+import { useCart } from "../context/CartContext";
+import CartPage from "../pages/CartPage";
 
 const Header = () => {
   const [cookies, removeCookie] = useCookies([]);
@@ -13,7 +15,7 @@ const Header = () => {
 
   const navigate = useNavigate();
 
-  const { logOut } = useCartContext();
+  const { cartItems } = useCart();
 
   const verifyCookie = async () => {
     if (!cookies.token) {
@@ -21,19 +23,27 @@ const Header = () => {
       return;
     }
 
-    const response = await fetch("http://localhost:3000/api/v1", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({}),
-    });
+    try {
+      const response = await fetch("http://localhost:3000/api/v1", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        // body: JSON.stringify({}),
+      });
 
-    const data = await response.json();
+      if (!response.ok) {
+        throw new Error("Network response not ok");
+      }
 
-    const { status, user } = data;
-    setName(user);
+      const data = await response.json();
+
+      const { status, user } = data;
+      setName(user);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
@@ -42,7 +52,6 @@ const Header = () => {
 
   const Logout = () => {
     removeCookie("token");
-    logOut;
     navigate("/login");
   };
 
@@ -79,9 +88,16 @@ const Header = () => {
                   <>
                     <Nav.Link>
                       <FaUser className="mx-2 fs-2" />
-                      <span className="fs-5">Hello, {name}</span>
+                      <span className="fs-5">{name}</span>
                     </Nav.Link>
+                    <LinkContainer to="/cart">
+                      <Nav.Link>
+                        <FaShoppingCart className="mx-2 fs-2" />
+                        <span className="fs-5">{cartItems}</span>
+                      </Nav.Link>
+                    </LinkContainer>
                     <Nav.Link onClick={Logout} className="fs-5 mx-3">
+                      <IoLogOut className="mx-2 fs-2" />
                       Logout
                     </Nav.Link>
                   </>

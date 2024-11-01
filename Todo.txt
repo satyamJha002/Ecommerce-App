@@ -1,0 +1,9 @@
+TODO:
+1. Pagination
+2. Cart view and API Integration
+3. Search from API
+
+
+TOLEARN
+1. How a Web page loads
+2. 

@@ -10,4 +10,6 @@ router.post("/products", addProduct);
 router.get("/products", getProducts);
 router.get("/products/:id", productById);
 
+/// base64.encode(user:pass) -> HjABF
+
 module.exports = router;

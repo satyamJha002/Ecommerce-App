@@ -22,7 +22,7 @@ export const UserProvider = ({ children }) => {
 
       if (success) {
         setUser(userData.user);
-        setIsLoggedIn(true);
+
         return { success, message };
       } else {
         return { success, message };
@@ -49,6 +49,7 @@ export const UserProvider = ({ children }) => {
 
       if (success) {
         setUser(data.user);
+        setIsLoggedIn(true);
         return { success, message };
       } else {
         return { success, message };
