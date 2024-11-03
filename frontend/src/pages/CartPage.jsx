@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from "react";
-import { Button, Col, Container, ListGroup, Row, Table } from "react-bootstrap";
+import { Button, Col, Container, Image, ListGroup, Row } from "react-bootstrap";
 import { CartContext } from "../context/CartContext";
 import { UserContext } from "../context/UserContext";
 import { Link } from "react-router-dom";
@@ -10,8 +10,8 @@ const CartPage = () => {
   const { user } = useContext(UserContext);
 
   useEffect(() => {
-    if (user) fetchCartItems(user._id);
-  }, [user, fetchCartItems]);
+    if (user && user._id) fetchCartItems(user._id);
+  }, [user]);
 
   if (error) {
     return <div>Error...{error}</div>;
@@ -19,7 +19,6 @@ const CartPage = () => {
 
   return (
     <Container>
-      <div>Your cart is empty</div>
       {cart.length === 0 ? (
         <div>Your Cart is empty</div>
       ) : (
@@ -27,17 +26,49 @@ const CartPage = () => {
           {cart.map((item) => (
             <ListGroup.Item key={item.productId._id}>
               <Row>
-                <Col md={6}>{item.productId.image}</Col>
-                <Col md={4}>{item.productId.title}</Col>
-                <Col md={3}>Rs. {item.productId.price}</Col>
-                <Col md={2}>Qty: {item.quantity}</Col>
-                <Col md={1}>
-                  <Button
-                    variant="danger"
-                    onClick={() => removeItemFromCart(user._id, item._id)}
-                  >
-                    Remove
-                  </Button>
+                <Col md={5}>
+                  {item.productId.images && item.productId.images.length > 1 ? (
+                    <Image
+                      src={item.productId.images[1]}
+                      fluid
+                      style={{
+                        width: "30%",
+                        display: "flex",
+                        justifyContent: "center",
+                      }}
+                    />
+                  ) : (
+                    <div>No Second Image Available</div>
+                  )}
+                </Col>
+                <Col md={4}>
+                  <ListGroup>
+                    <ListGroup.Item>{item.productId.title}</ListGroup.Item>
+                  </ListGroup>
+                  <ListGroup>
+                    <ListGroup.Item>
+                      Specification: {item.productId.specs}
+                    </ListGroup.Item>
+                  </ListGroup>
+                </Col>
+                <Col md={3}>
+                  <ListGroup>
+                    <ListGroup.Item>Rs. {item.productId.price}</ListGroup.Item>
+                  </ListGroup>
+                  <ListGroup>
+                    <ListGroup.Item>Qty: {item.quantity}</ListGroup.Item>
+                  </ListGroup>
+
+                  <ListGroup>
+                    <ListGroup.Item>
+                      <Button
+                        variant="danger"
+                        onClick={() => removeItemFromCart(user._id, item._id)}
+                      >
+                        Remove
+                      </Button>
+                    </ListGroup.Item>
+                  </ListGroup>
                 </Col>
               </Row>
             </ListGroup.Item>

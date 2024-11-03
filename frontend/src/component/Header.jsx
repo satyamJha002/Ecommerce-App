@@ -4,9 +4,11 @@ import { FaShoppingCart, FaUser } from "react-icons/fa";
 import { IoLogOut } from "react-icons/io5";
 import { useContext } from "react";
 import { UserContext } from "../context/UserContext";
+import { CartContext } from "../context/CartContext";
 
 const Header = () => {
   const { isLoggedIn, user, logOut } = useContext(UserContext);
+  const { itemCount } = useContext(CartContext);
 
   return (
     <header>
@@ -46,7 +48,7 @@ const Header = () => {
                     <LinkContainer to="/cart">
                       <Nav.Link>
                         <FaShoppingCart className="mx-2 fs-2" />
-                        <span className="fs-5">0</span>
+                        <span className="fs-5">{itemCount}</span>
                       </Nav.Link>
                     </LinkContainer>
                     <Nav.Link className="fs-5 mx-3" onClick={logOut}>

@@ -7,7 +7,7 @@ const getCartItems = asyncHandler(async (req, res) => {
 
   const cart = await Cart.findOne({ user: id }).populate(
     "items.productId",
-    "name price"
+    "images title price specs rating"
   );
 
   if (!cart) {
