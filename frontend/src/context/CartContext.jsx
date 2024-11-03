@@ -80,8 +80,6 @@ export const CartProvider = ({ children }) => {
           },
         }
       );
-      console.log(response.data.cart.items);
-      console.log(response.data.cart.total);
       setCart(response.data.cart.items);
       setTotal(response.data.cart.total);
       setItemCount(

@@ -13,8 +13,12 @@ export const UserProvider = ({ children }) => {
   useEffect(() => {
     const savedUser = JSON.parse(localStorage.getItem("user"));
     const savedToken = localStorage.getItem("token");
-    if (savedUser) setUser(savedUser);
-    if (savedToken) setToken(savedToken);
+
+    if (savedUser && savedToken) {
+      setUser(savedUser);
+      setToken(savedToken);
+      setIsLoggedIn(true);
+    }
   }, []);
 
   const saveUser = (formData) => {

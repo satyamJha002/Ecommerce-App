@@ -5,10 +5,18 @@ import { IoLogOut } from "react-icons/io5";
 import { useContext } from "react";
 import { UserContext } from "../context/UserContext";
 import { CartContext } from "../context/CartContext";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
   const { isLoggedIn, user, logOut } = useContext(UserContext);
   const { itemCount } = useContext(CartContext);
+
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logOut();
+    navigate("/");
+  };
 
   return (
     <header>
@@ -51,7 +59,7 @@ const Header = () => {
                         <span className="fs-5">{itemCount}</span>
                       </Nav.Link>
                     </LinkContainer>
-                    <Nav.Link className="fs-5 mx-3" onClick={logOut}>
+                    <Nav.Link className="fs-5 mx-3" onClick={handleLogout}>
                       <IoLogOut className="mx-2 fs-2" />
                       Logout
                     </Nav.Link>

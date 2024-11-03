@@ -27,14 +27,13 @@ const CartPage = () => {
             <ListGroup.Item key={item.productId._id}>
               <Row>
                 <Col md={5}>
-                  {item.productId.images && item.productId.images.length > 1 ? (
+                  {item.productId.images && item.productId.images.length > 0 ? (
                     <Image
-                      src={item.productId.images[1]}
+                      src={item.productId.images[1] || item.productId.images[0]}
                       fluid
                       style={{
-                        width: "30%",
-                        display: "flex",
-                        justifyContent: "center",
+                        width: "300px",
+                        objectFit: "cover",
                       }}
                     />
                   ) : (
