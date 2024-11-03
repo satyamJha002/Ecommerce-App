@@ -1,22 +1,21 @@
-import React from "react";
+import React, { useContext } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useFetch from "../hooks/useFetch";
 import { Link } from "react-router-dom";
 import { Row, Col, Image, ListGroup, Card, Button } from "react-bootstrap";
 import Rating from "../component/Rating";
-import { useUserContext } from "../context/UserContext";
 import { toast } from "react-toastify";
-import { useCart } from "../context/CartContext";
-import Header from "../component/Header";
+import { UserContext } from "../context/UserContext";
+import { CartContext } from "../context/CartContext";
 
 const ProductDetailsPage = () => {
   const { id } = useParams();
 
   const navigate = useNavigate();
 
-  const { isLoggedIn } = useUserContext();
+  const { user, isLoggedIn } = useContext(UserContext);
 
-  const { cartItems, addToCart } = useCart();
+  const { addItemToCart } = useContext(CartContext);
 
   const { data, error, loading } = useFetch(
     `http://localhost:3000/api/v1/products/${id}`
@@ -29,8 +28,9 @@ const ProductDetailsPage = () => {
         navigate("/login");
       }, 1000);
     } else {
-      addToCart();
+      addItemToCart(user._id, id, 1);
       toast.success("item is added to cart");
+      navigate("/cart");
     }
   };
 

@@ -1,75 +1,78 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
+import axios from "axios";
 
-const UserContext = createContext();
+export const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [token, setToken] = useState(null);
+
+  useEffect(() => {
+    const savedUser = JSON.parse(localStorage.getItem("user"));
+    const savedToken = localStorage.getItem("token");
+    if (savedUser) setUser(savedUser);
+    if (savedToken) setToken(savedToken);
+  }, []);
+
+  const saveUser = (formData) => {
+    setUser(formData);
+    setToken(formData.token);
+    localStorage.setItem("user", JSON.stringify(formData));
+    localStorage.setItem("token", formData.token);
+  };
 
   const signUp = async (formData) => {
+    setLoading(true);
+    setError(null);
     try {
-      const response = await fetch("http://localhost:3000/api/v1/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(formData),
-      });
-
-      const userData = await response.json();
-      const { success, message } = userData;
-
-      if (success) {
-        setUser(userData.user);
-
-        return { success, message };
-      } else {
-        return { success, message };
-      }
+      const response = await axios.post(
+        "http://localhost:3000/api/v1/auth/register",
+        formData
+      );
+      console.log(response.data);
+      saveUser(response.data);
     } catch (error) {
       console.log(error);
-      return { success: false, message: "An error occured duing signup." };
+      setError(error.response?.data?.message || "Signup Failed");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const signIn = async (formData) => {
+  const logIn = async (formData) => {
+    setLoading(true);
+    setError(null);
     try {
-      const response = await fetch("http://localhost:3000/api/v1/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-      const { success, message } = data;
-
-      if (success) {
-        setUser(data.user);
-        setIsLoggedIn(true);
-        return { success, message };
-      } else {
-        return { success, message };
-      }
+      const response = await axios.post(
+        "http://localhost:3000/api/v1/auth/login",
+        formData
+      );
+      console.log(response.data);
+      setIsLoggedIn(true);
+      saveUser(response.data);
     } catch (error) {
-      console.log(error);
-      return { success: false, message: "An error occured during login" };
+      console.log(error.response?.data?.message || "Login Failed");
+    } finally {
+      setLoading(false);
     }
   };
 
   const logOut = () => {
     setUser(null);
+    setToken(null);
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
     setIsLoggedIn(false);
   };
 
   return (
-    <UserContext.Provider value={{ user, signUp, signIn, isLoggedIn, logOut }}>
+    <UserContext.Provider
+      value={{ user, loading, error, isLoggedIn, token, signUp, logIn, logOut }}
+    >
       {children}
     </UserContext.Provider>
   );
 };
-
-export const useUserContext = () => useContext(UserContext);

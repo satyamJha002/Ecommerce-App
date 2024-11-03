@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Button, Card, Col, Container, Form, Row } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useUserContext } from "../context/UserContext";
+import { UserContext } from "../context/UserContext";
 
 const SignIn = () => {
   const [formData, setFormData] = useState({
@@ -14,7 +14,7 @@ const SignIn = () => {
 
   const navigate = useNavigate();
 
-  const { signIn } = useUserContext();
+  const { logIn, error, loading } = useContext(UserContext);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -26,22 +26,8 @@ const SignIn = () => {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-
-    const { success, message } = await signIn(formData);
-
-    if (success) {
-      toast.success(message);
-      setTimeout(() => {
-        navigate("/");
-      }, 1000);
-    } else {
-      toast.error(message);
-    }
-
-    setFormData({
-      email: "",
-      password: "",
-    });
+    await logIn(formData);
+    navigate("/");
   };
 
   return (
@@ -84,9 +70,11 @@ const SignIn = () => {
                     </p>
                   </div>
                   <div className="d-grid">
-                    <Button variant="light" type="submit">
-                      Login
+                    <Button variant="light" type="submit" disabled={loading}>
+                      {loading ? "Loggin in..." : "Log In"}
                     </Button>
+
+                    {error && <p style={{ color: "red" }}>{error}</p>}
                   </div>
                 </Form>
                 <div className="mt-3">

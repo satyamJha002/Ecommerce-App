@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
 const connectionDB = require("./connection/db");
 const categoryRoute = require("./routes/categoryRoute");
+const cartRoute = require("./routes/cartRoute");
 const productRoute = require("./routes/productRoute");
 const authRoute = require("./routes/authRoute");
 const app = express();
@@ -26,7 +27,8 @@ app.use(express.json());
 
 app.use("/api/v1/", categoryRoute);
 app.use("/api/v1/", productRoute);
-app.use("/api/v1/", authRoute);
+app.use("/api/v1/cart", cartRoute);
+app.use("/api/v1/auth", authRoute);
 
 app.listen(3000, () => {
   console.log("Server is listening at http://localhost:3000/");

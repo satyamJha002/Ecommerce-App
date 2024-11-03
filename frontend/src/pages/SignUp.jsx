@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   Button,
   Card,
@@ -10,8 +10,7 @@ import {
 } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useUserContext } from "../context/UserContext";
-
+import { UserContext } from "../context/UserContext";
 const SignUp = () => {
   const [formData, setFormData] = useState({
     name: "",
@@ -23,7 +22,7 @@ const SignUp = () => {
 
   const navigate = useNavigate();
 
-  const { signUp } = useUserContext();
+  const { signUp, erro, loading } = useContext(UserContext);
 
   const handleChange = (e) => {
     setFormData((prevState) => ({
@@ -35,22 +34,9 @@ const SignUp = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
-    const { success, message } = await signUp(formData);
+    await signUp(formData);
 
-    if (success) {
-      toast.success(message);
-      setTimeout(() => {
-        navigate("/login");
-      }, 1000);
-    } else {
-      toast.error(message);
-    }
-
-    setFormData({
-      name: "",
-      email: "",
-      password: "",
-    });
+    navigate("/login");
   };
 
   return (

@@ -1,23 +1,36 @@
-const User = require("../models/user");
-require("dotenv").config();
 const jwt = require("jsonwebtoken");
+const asyncHandler = require("express-async-handler");
+const User = require("../models/user");
 
-const userVerification = (req, res) => {
-  const token = req.cookies.token;
+const protect = asyncHandler(async (req, res, next) => {
+  let token;
 
-  if (!token) {
-    return res.json({ status: false });
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    try {
+      token = req.headers.authorization.split(" ")[1];
+
+      // verify token
+      const decoded = jwt.verify(token, process.env.SECRET_KEY);
+
+      //  Get user from the token
+
+      req.user = await User.findById(decoded.id).select("-password");
+
+      next();
+    } catch (error) {
+      console.log(error);
+      res.status(401).json({ success: false, message: "Not authorized" });
+    }
   }
 
-  jwt.verify(token, process.env.SECRET_KEY, async (err, data) => {
-    if (err) {
-      return res.json({ status: false });
-    } else {
-      const user = await User.findById(data.id);
-      if (user) return res.json({ status: true, user: user.name });
-      else return res.json({ status: false });
-    }
-  });
-};
+  if (!token) {
+    res
+      .status(401)
+      .json({ success: false, message: "Not authorized, no token" });
+  }
+});
 
-module.exports = userVerification;
+module.exports = { protect };

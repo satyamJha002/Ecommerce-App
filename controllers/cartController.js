@@ -1,61 +1,85 @@
 const Cart = require("../models/cart");
 const Products = require("../models/products");
+const asyncHandler = require("express-async-handler");
 
-const getCart = async (req, res) => {
-  try {
-    const cart = await Cart.findById(req.params.id).populate("items.productId");
+const getCartItems = asyncHandler(async (req, res) => {
+  const { id } = req.params;
 
-    if (!cart) {
-      return res.status(404).json({ message: "Cart not found" });
-    }
+  const cart = await Cart.findOne({ user: id }).populate(
+    "items.productId",
+    "name price"
+  );
 
-    res.status(200).json(cart);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Failed to retrieve Cart" });
+  if (!cart) {
+    return res.status(404).json({ success: false, message: "Cart not found" });
   }
-};
 
-const createCart = async (req, res) => {
-  try {
-    const { items, total } = req.body;
-    const newCart = new Cart({ items, total });
-    await newCart.save();
-
-    res.status(201).json(newCart);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Failed to create cart" });
+  if (cart) {
+    res.status(200).json({ success: true, cart });
+  } else {
+    res
+      .status(500)
+      .json({ success: false, message: "Error fetching cart items", error });
   }
-};
+});
 
-const addToCart = async (req, res) => {
-  try {
-    const { productId, quantity } = req.body;
-    let cart = await Cart.findById(req.params.id);
+const addCartItems = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { productId, quantity } = req.body;
 
-    if (!cart) {
-      return res.status(404).json({ message: "Cart not found" });
-    }
+  let cart = await Cart.findOne({ user: id });
 
-    const itemsIndex = cart.items.findIndex(
-      (item) => item.productId.toString() === productId
-    );
+  if (!cart) {
+    cart = new Cart({ user: id, items: [], total: 0 });
+  }
 
-    if (itemsIndex) {
-      cart.items[itemsIndex].quantity += quantity;
-    } else {
-      cart.items.push({ productId, quantity });
-    }
+  const itemsIndex = cart.items.findIndex(
+    (item) => item.productId.toString() === productId
+  );
 
-    const product = await Products.findById(productId);
-    cart.total += product.price * quantity;
+  if (itemsIndex > -1) {
+    cart.items[itemsIndex].quantity += quantity;
+  } else {
+    cart.items.push({ productId, quantity });
+  }
 
+  const product = await Products.findById(productId);
+  cart.total += product.price * quantity;
+
+  await cart.save();
+
+  if (cart) {
+    return res.status(200).json({ success: true, cart });
+  } else {
+    return res
+      .status(500)
+      .json({ message: "Error adding item to cart", error });
+  }
+});
+
+const removeItemFromCart = asyncHandler(async (req, res) => {
+  const { userId, itemId } = req.params;
+
+  const cart = await Cart.findOne({ user: userId });
+
+  if (!cart) {
+    return res.status(404).json({ success: false, message: "Cart not found" });
+  }
+
+  const itemsIndex = cart.items.findIndex(
+    (item) => item._id.toString() === itemId
+  );
+
+  if (itemsIndex > -1) {
+    const product = await Products.findById(cart.items[itemsIndex].productId);
+    cart.total -= product.price * cart.items[itemsIndex].quantity;
+    cart.items.splice(itemsIndex, 1);
     await cart.save();
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Failed to add to cart" });
-  }
-};
 
-module.exports = { getCart, createCart, addToCart };
+    res.status(200).json({ success: true, cart });
+  } else {
+    res.status(404).json({ success: false, message: "Item not found in cart" });
+  }
+});
+
+module.exports = { getCartItems, addCartItems, removeItemFromCart };

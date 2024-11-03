@@ -1,82 +1,88 @@
 const User = require("../models/user");
-const createSecretToken = require("../utiils/SecretToken");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const asyncHandler = require("express-async-handler");
 
-const signUp = async (req, res) => {
-  try {
-    const { name, email, password, isAdmin } = req.body;
+const signUp = asyncHandler(async (req, res) => {
+  const { name, email, password } = req.body;
 
-    const existingUser = await User.findOne({ email });
-
-    if (existingUser) {
-      return res.json({ message: "User already exists" });
-    }
-
-    const newUser = new User({
-      name,
-      email,
-      isAdmin,
-    });
-
-    let hashedPassword = await newUser.createHash(password);
-    newUser.password = hashedPassword;
-
-    await newUser.save();
-
-    const token = createSecretToken(newUser._id);
-
-    res.cookie("token", token, {
-      withCredentials: true,
-      httpOnly: false,
-    });
-
-    res
-      .status(200)
-      .json({ message: "User signed up successfully", success: true, newUser });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Failed to create user", error });
+  if (!name || !email || !password) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Fill all required fields" });
   }
+
+  const existingUser = await User.findOne({ email });
+
+  if (existingUser) {
+    return res
+      .status(404)
+      .json({ success: false, message: "User already created same email" });
+  }
+
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+
+  const newUser = await User.create({
+    name,
+    email,
+    password: hashedPassword,
+  });
+
+  if (newUser) {
+    return res.status(200).json({
+      _id: newUser._id,
+      name: newUser.name,
+      email: newUser.email,
+      password: newUser.password,
+      token: generateToken(newUser._id),
+    });
+  } else {
+    return res
+      .status(400)
+      .json({ success: false, message: "Invalid User Data" });
+  }
+});
+
+const logIn = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await User.findOne({ email });
+
+  const comparePswd = await bcrypt.compare(password, user.password);
+
+  const token = generateToken(user._id);
+  user.token = token;
+
+  if (user && comparePswd) {
+    return res.status(200).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      isAdmin: user.isAdmin,
+      token: generateToken(user._id),
+    });
+  } else {
+    return res
+      .status(400)
+      .json({ success: false, message: "Invalid credentials" });
+  }
+});
+
+const getUser = asyncHandler(async (req, res) => {
+  const { _id, name, email } = await User.findById(req.user.id);
+
+  res.status(200).json({
+    id: _id,
+    name,
+    email,
+  });
+});
+
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.SECRET_KEY, {
+    expiresIn: "10d",
+  });
 };
 
-const logIn = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.json({ message: "All fields are required" });
-    }
-
-    let user = await User.findOne({ email });
-
-    if (!user) {
-      return res.json({ message: "Incorrect password or email" });
-    }
-
-    let auth = await user.validatePassword(password, user.password);
-
-    if (!auth) {
-      return res.json({ message: "Incorrect email and password" });
-    }
-
-    const token = createSecretToken(user._id);
-
-    res.cookie("token", token, {
-      withCredentials: true,
-      httpOnly: false,
-    });
-
-    res
-      .status(201)
-      .json({ message: "User signed in successfully", success: true, user });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json(
-      {
-        message: "Invalid email/password",
-      },
-      error
-    );
-  }
-};
-
-module.exports = { signUp, logIn };
+module.exports = { signUp, logIn, getUser };
