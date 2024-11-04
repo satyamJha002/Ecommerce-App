@@ -12,8 +12,18 @@ import {
 } from "react-bootstrap";
 import Product from "../component/Product";
 import { IoIosArrowForward } from "react-icons/io";
+import PaginationComponent from "../component/Pagination";
 
 const HomePage = () => {
+  const [search, setSearch] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [filterProducts, setFiltereProducts] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 4;
+
   const { data, loading, error } = useFetch(
     "http://localhost:3000/api/v1/products/"
   );
@@ -24,11 +34,14 @@ const HomePage = () => {
     loading: categoriesLoading,
   } = useFetch("http://localhost:3000/api/v1/categories");
 
-  const [search, setSearch] = useState("");
-  const [suggestions, setSuggestions] = useState([]);
-  const [filterProducts, setFiltereProducts] = useState([]);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = filterProducts.slice(
+    indexOfFirstProduct,
+    indexOfLastProduct
+  );
+
+  const totalPages = Math.ceil(filterProducts.length / productsPerPage);
 
   if (error) {
     return <div>{error}</div>;
@@ -66,6 +79,8 @@ const HomePage = () => {
     setSelectedProduct(suggest);
     setSuggestions([]);
   };
+
+  const handlePageChange = (page) => setCurrentPage(page);
 
   const handleClickFilter = (category) => {
     console.log(category);
@@ -152,7 +167,7 @@ const HomePage = () => {
 
       {filterProducts ? (
         <Row>
-          {filterProducts.map((product) => (
+          {currentProducts.map((product) => (
             <Col key={product._id} sm={12} md={6} lg={4} xl={3}>
               <Product product={product} />
             </Col>
@@ -160,13 +175,19 @@ const HomePage = () => {
         </Row>
       ) : (
         <Row>
-          {data?.products.map((product) => (
+          {currentProducts.map((product) => (
             <Col key={product._id} sm={12} md={6} lg={4} xl={3}>
               <Product product={product} />
             </Col>
           ))}
         </Row>
       )}
+
+      <PaginationComponent
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
     </>
   );
 };
