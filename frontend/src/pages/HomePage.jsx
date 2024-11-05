@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import useFetch from "../hooks/useFetch";
 import {
   Alert,
@@ -13,6 +13,8 @@ import {
 import Product from "../component/Product";
 import { IoIosArrowForward } from "react-icons/io";
 import PaginationComponent from "../component/Pagination";
+import { CartContext } from "../context/CartContext";
+import { UserContext } from "../context/UserContext";
 
 const HomePage = () => {
   const [search, setSearch] = useState("");
@@ -34,18 +36,24 @@ const HomePage = () => {
     loading: categoriesLoading,
   } = useFetch("http://localhost:3000/api/v1/categories");
 
+  const { fetchCartItems } = useContext(CartContext);
+  const { user } = useContext(UserContext);
+
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = filterProducts.slice(
     indexOfFirstProduct,
     indexOfLastProduct
   );
-
   const totalPages = Math.ceil(filterProducts.length / productsPerPage);
 
   if (error) {
     return <div>{error}</div>;
   }
+
+  useEffect(() => {
+    if (user && user._id) fetchCartItems(user._id);
+  }, [user]);
 
   useEffect(() => {
     if (search && data?.products) {

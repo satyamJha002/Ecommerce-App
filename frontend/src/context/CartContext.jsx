@@ -31,6 +31,7 @@ export const CartProvider = ({ children }) => {
       setItemCount(
         response.data.cart.items.reduce((sum, item) => sum + item.quantity, 0)
       );
+      console.log("Cart list fetch");
     } catch (error) {
       console.log(error);
       setError("Failed to fetch cart items", error);
@@ -60,6 +61,8 @@ export const CartProvider = ({ children }) => {
       setItemCount(
         response.data.cart.items.reduce((sum, item) => sum + item.quantity, 0)
       );
+
+      fetchCartItems(userId);
     } catch (error) {
       console.log(error);
       setError("Failed to add items in cart", error);
@@ -85,6 +88,7 @@ export const CartProvider = ({ children }) => {
       setItemCount(
         response.data.cart.items.reduce((sum, item) => sum + item.quantity, 0)
       );
+      fetchCartItems(userId);
     } catch (error) {
       console.log(error);
       setError("Failed to remove item from cart", error);
