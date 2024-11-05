@@ -23,14 +23,13 @@ const ProductDetailsPage = () => {
 
   const handleClick = () => {
     if (!isLoggedIn) {
-      toast.error("Please Sign in");
+      toast.error("Please Sign in", {position: 'bottom-right'});
       setTimeout(() => {
         navigate("/login");
       }, 1000);
     } else {
       addItemToCart(user._id, id, 1);
-      toast.success("item is added to cart");
-      navigate("/cart");
+      toast.success("item is added to cart", {position:'bottom-right'});
     }
   };
 

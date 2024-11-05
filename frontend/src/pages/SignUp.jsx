@@ -35,7 +35,7 @@ const SignUp = () => {
     e.preventDefault();
 
     await signUp(formData);
-
+    toast.success('You are successfully registered', {position: 'bottom-right'});
     navigate("/login");
   };
 

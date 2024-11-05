@@ -6,6 +6,7 @@ import { useContext } from "react";
 import { UserContext } from "../context/UserContext";
 import { CartContext } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
+import {toast} from "react-toastify";
 
 const Header = () => {
   const { isLoggedIn, user, logOut } = useContext(UserContext);
@@ -16,6 +17,7 @@ const Header = () => {
   const handleLogout = async () => {
     await logOut();
     navigate("/");
+    toast.success('You successfully logged out', {position: 'bottom-right'});
   };
 
   return (

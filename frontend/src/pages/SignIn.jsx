@@ -27,6 +27,7 @@ const SignIn = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     await logIn(formData);
+    toast.success('You are logged in', {position: 'bottom-right'});
     navigate("/");
   };
 
